@@ -42,6 +42,13 @@ def init_db():
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    
+    # Ensure the photo_path column exists
+    cursor.execute("PRAGMA table_info(forum_messages)")
+    columns = [col[1] for col in cursor.fetchall()]
+    if "photo_path" not in columns:
+        cursor.execute("ALTER TABLE forum_messages ADD COLUMN photo_path TEXT")
+    
     conn.commit()
     return conn
 
@@ -50,10 +57,10 @@ conn = init_db()
 # Load messages from the database into session state
 def load_messages():
     cursor = conn.cursor()
-    cursor.execute("SELECT message, timestamp FROM forum_messages ORDER BY timestamp DESC")
+    cursor.execute("SELECT message, photo_path, timestamp FROM forum_messages ORDER BY timestamp DESC")  # Include photo_path
     rows = cursor.fetchall()
     st.session_state.messages = [
-        {"name": "User", "message": row[0], "timestamp": row[1]} for row in rows
+        {"name": "User", "message": row[0], "photo_path": row[1], "timestamp": row[2]} for row in rows
     ]
 
 # Initialize session state with messages from the database
@@ -78,7 +85,7 @@ if st.session_state.current_user is None:
         if st.button("Login"):
             st.session_state.show_login_form = True
     else:
-        with st.form("login_form"):
+        with st.form("forum_login_form"):  # Updated key to make it unique
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
             login_submitted = st.form_submit_button("Login")
@@ -116,7 +123,13 @@ def is_spam(message):
 
 # Form for new message
 with st.form("new_message", clear_on_submit=True):
-    user_name = st.text_input("Your Name")
+    if st.session_state.get("current_user"):
+        user_name = st.session_state.current_user  # Use logged-in user's name
+        st.text(f"Posting as: {user_name}")
+    else:
+        st.error("You must be logged in to post a message.")
+        user_name = None
+
     message = st.text_area("Your Message")
     photo = st.file_uploader("Upload a Photo (optional)", type=["jpg", "jpeg", "png"])
     submitted = st.form_submit_button("Post Message")
@@ -156,7 +169,7 @@ for idx, msg in enumerate(st.session_state.messages):
     st.text(f"{msg['timestamp']} - {msg['name']}:")
     st.write(msg['message'])
     if msg.get("photo_path"):
-        st.image(msg["photo_path"], use_column_width=True)
+        st.image(msg["photo_path"], use_container_width=True)  # Updated parameter
     
     # Allow editing and deleting if the user is admin
     if st.session_state.get("current_user") == ADMIN_USERNAME:

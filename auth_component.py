@@ -47,7 +47,7 @@ def login_button():
         if st.sidebar.button("Logout"):
             st.session_state.current_user = None
     else:
-        with st.sidebar.form("login_form"):
+        with st.sidebar.form("auth_login_form"):  # Updated key to make it unique
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
             login_submitted = st.form_submit_button("Login")
