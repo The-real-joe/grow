@@ -3,4 +3,3 @@ pandas
 scikit-learn
 better-profanity
 Textblob
-auth0-python
