@@ -165,17 +165,34 @@ with st.form("new_message", clear_on_submit=True):
 
 # Livestream section
 st.subheader("Livestream")
-youtube_url = st.text_input("Enter YouTube Live URL (Admins Only):", key="youtube_url")
-
-if st.session_state.get("current_user") == ADMIN_USERNAME and youtube_url:
-    st.session_state.youtube_url = youtube_url  # Save the URL in session state
-elif "youtube_url" in st.session_state:
-    youtube_url = st.session_state.youtube_url
-
-if youtube_url:
-    st.video(youtube_url)  # Embed the YouTube Live stream
+if st.session_state.get("current_user") == ADMIN_USERNAME:
+    youtube_url = st.text_input("Enter YouTube Live URL (Admins Only):", key="youtube_url")
+    if youtube_url:
+        st.session_state.youtube_url = youtube_url  # Save the URL in session state
 else:
-    st.info("No livestream is currently available.")
+    if "youtube_url" in st.session_state:
+        youtube_url = st.session_state.youtube_url
+        st.video(youtube_url)  # Embed the YouTube Live stream
+    else:
+        st.info("No livestream is currently available.")
+        # Allow users to request a livestream
+        if st.button("Request Livestream"):
+            if "livestream_requests" not in st.session_state:
+                st.session_state.livestream_requests = []
+            st.session_state.livestream_requests.append(st.session_state.current_user or "Anonymous")
+            st.success("Livestream request sent to the admin!")
+
+# Display livestream requests for admin
+if st.session_state.get("current_user") == ADMIN_USERNAME and "livestream_requests" in st.session_state:
+    st.subheader("Livestream Requests")
+    if st.session_state.livestream_requests:
+        for idx, requester in enumerate(st.session_state.livestream_requests):
+            st.write(f"{idx + 1}. {requester}")
+        if st.button("Clear Requests"):
+            st.session_state.livestream_requests = []
+            st.success("Livestream requests cleared.")
+    else:
+        st.info("No livestream requests.")
 
 # Display messages
 st.subheader("Messages")
