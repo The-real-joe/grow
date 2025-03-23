@@ -1,9 +1,9 @@
 import streamlit as st
 import requests  # Add requests for HTTP calls
 
-AUTH0_DOMAIN = "your-auth0-domain"
-AUTH0_CLIENT_ID = "your-client-id"
-AUTH0_CLIENT_SECRET = "your-client-secret"
+AUTH0_DOMAIN = "dev-44itgmq3qv6j5067.us.auth0.com"
+AUTH0_CLIENT_ID = "XddfkRbRfWW4vM4nJEhNRbjLsapabMo2"
+AUTH0_CLIENT_SECRET = "zYVEmYJPgcuZijg1UrlbrpUyA6SusgnEnUwR6ug7RJX4Ka-aDeMPlt_lROKp_7hV"
 AUTH0_CALLBACK_URL = "your-callback-url"
 
 def login_button():
